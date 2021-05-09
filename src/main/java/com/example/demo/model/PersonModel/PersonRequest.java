@@ -1,9 +1,6 @@
-package com.example.demo.model;
+package com.example.demo.model.PersonModel;
 
 import lombok.Data;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 @Data
 public class PersonRequest {

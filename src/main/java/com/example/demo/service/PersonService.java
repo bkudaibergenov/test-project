@@ -1,8 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.model.City;
-import com.example.demo.model.Person;
-import com.example.demo.model.PersonRequest;
+import com.example.demo.model.PersonModel.City;
+import com.example.demo.model.PersonModel.Person;
+import com.example.demo.model.PersonModel.PersonRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
