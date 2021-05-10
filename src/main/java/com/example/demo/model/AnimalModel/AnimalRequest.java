@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 public class AnimalRequest {
+    private String name;
     private String animalName1;
     private String animalName2;
 }

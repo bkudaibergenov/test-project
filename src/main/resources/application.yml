@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: demo-service
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/demo
+    initialization-mode: always
+    username: postgres
+    password: postgres
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none
