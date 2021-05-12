@@ -25,24 +25,31 @@ public class ContactController {
         contactService.createNewContact(request);
     }
 
-    @PostMapping("/findContactByName")
-    public List<Contact> findByName(@RequestBody ContactRequest request) {
-        return contactService.findContactByName(request);
+
+    @PostMapping("/findById")
+    public Optional<Contact> findById(@RequestBody ContactRequest request) {
+        return contactService.findById(request);
     }
 
-    @PostMapping("/findContactByFirstName")
-        public List<Contact> findContactByFirst_Name(@RequestBody ContactRequest request) {
-        return contactService.findContactByFirst_Name(request);
+
+    @PostMapping("/findContactByName")
+    public List<Contact> findByName(@RequestBody ContactRequest request) {
+        return contactService.findByName(request);
+    }
+
+    @PostMapping("/findByFirstName")
+        public List<Contact> findByFirstName(@RequestBody ContactRequest request) {
+        return contactService.findByFirstName(request);
     }
 
     @PostMapping("/findContactByLastName")
-    public List<Contact> findContactByLast_Name(@RequestBody ContactRequest request) {
-        return contactService.findContactByLast_Name(request);
+    public List<Contact> findContactByLastName(@RequestBody ContactRequest request) {
+        return contactService.findByLastName(request);
     }
 
     @PostMapping("/findByPhoneNumber")
-    public Optional<Contact> findByPhone_Number(@RequestBody ContactRequest request) {
-        return contactService.findByPhone_Number(request);
+    public Contact findByPhoneNumber(@RequestBody ContactRequest request) {
+        return contactService.findByPhoneNumber(request);
     }
 
     @PostMapping("/editContact")
@@ -52,6 +59,7 @@ public class ContactController {
 
     @PostMapping("/deleteContactPhoneNumber")
     public void deleteContactPhoneNumber(@RequestBody ContactRequest request) {
+
         contactService.deleteContactPhoneNumber(request);
     }
 

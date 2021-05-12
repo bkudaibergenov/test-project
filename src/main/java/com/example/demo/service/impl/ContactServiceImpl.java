@@ -4,6 +4,7 @@ import com.example.demo.entity.Contact;
 import com.example.demo.model.ContactModel.ContactRequest;
 import com.example.demo.repository.ContactRepository;
 import com.example.demo.service.ContactService;
+import org.hibernate.sql.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class ContactServiceImpl implements ContactService {
 
 
     @Override
-    public List<Contact> findContactByName(ContactRequest request) {
+    public List<Contact> findByName(ContactRequest request) {
         List<Contact> findByNameList = contactRepository.findByName(request.getName());
         List<Contact> contactList = new ArrayList<>();
         findByNameList.forEach(a -> {
@@ -32,23 +33,25 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public List<Contact> findContactByFirst_Name(ContactRequest request) {
-        List<Contact> findByFirstNameList = contactRepository.findByFirstName(request.getFirst_name());
-        List<Contact> contactList = new ArrayList<>();
-        findByFirstNameList.forEach(a -> {
-            if (Objects.equals(a.getFirstName(), request.getFirst_name())) {
-                contactList.add(a);
-            }
-        });
-        return contactList;
+    public List<Contact> findByFirstName(ContactRequest request) {
+        List<Contact> findByFirstNameList = contactRepository.findByFirstName(request.getFirstName());
+        System.out.println("We are in byFirstName");
+//        List<Contact> contactList = new ArrayList<>();
+//        System.out.println(findByFirstNameList);
+//        findByFirstNameList.forEach(a -> {
+//            if (Objects.equals(a.getFirstName(), request.getFirstName())) {
+//                contactList.add(a);
+//            }
+//        });
+        return findByFirstNameList;
     }
 
     @Override
-    public List<Contact> findContactByLast_Name(ContactRequest request) {
-        List<Contact> findByLastNameList = contactRepository.findByLastName(request.getLast_name());
+    public List<Contact> findByLastName(ContactRequest request) {
+        List<Contact> findByLastNameList = contactRepository.findByLastName(request.getLastName());
         List<Contact> contactList = new ArrayList<>();
         findByLastNameList.forEach(a -> {
-            if (Objects.equals(a.getLastName(), request.getLast_name())) {
+            if (Objects.equals(a.getLastName(), request.getLastName())) {
                 contactList.add(a);
             }
         });
@@ -56,8 +59,13 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public Optional<Contact> findByPhone_Number(ContactRequest request) {
-        return contactRepository.findByPhoneNumber(request.getPhone_number());
+    public Contact findByPhoneNumber(ContactRequest request) {
+        return contactRepository.findByPhoneNumber(request.getPhoneNumber()).orElse(null);
+    }
+
+    @Override
+    public Optional<Contact> findById(ContactRequest request) {
+        return contactRepository.findById(request.getId());
     }
 
 
@@ -65,29 +73,31 @@ public class ContactServiceImpl implements ContactService {
     public void createNewContact(ContactRequest request) {
         Contact contact = Contact.builder()
                 .name(request.getName())
-                .firstName(request.getFirst_name())
-                .lastName(request.getLast_name())
-                .phoneNumber(request.getPhone_number())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .phoneNumber(request.getPhoneNumber())
                 .build();
         contactRepository.save(contact);
     }
 
     @Override
     public void editContact(ContactRequest request) {
-        Contact findedById =  contactRepository.findById(request.getId()).orElse(null);
+        Contact findById =  contactRepository.findById(request.getId()).orElse(null);
 
-        assert findedById != null;
-        findedById.setFirstName(request.getFirst_name());
-        findedById.setName(request.getName());
-        findedById.setLastName(request.getName());
-        findedById.setPhoneNumber(request.getPhone_number());
+        assert findById != null;
+        findById.setFirstName(request.getFirstName());
+        findById.setName(request.getName());
+        findById.setLastName(request.getName());
+        findById.setPhoneNumber(request.getPhoneNumber());
 
-        contactRepository.save(findedById);
+        contactRepository.save(findById);
     }
 
     @Override
     public void deleteContactPhoneNumber(ContactRequest request) {
 
+        Optional<Contact> contact = contactRepository.findByPhoneNumber(request.getPhoneNumber());
+        contact.ifPresent(contactRepository::delete);
 
     }
 }
