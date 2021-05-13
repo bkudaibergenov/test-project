@@ -1,6 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.entity.Contact;
+import com.example.demo.entity.dto.ContactDto;
 import com.example.demo.model.ContactModel.ContactRequest;
 import com.example.demo.repository.ContactRepository;
 import com.example.demo.service.ContactService;
@@ -19,12 +20,11 @@ public class ContactServiceImpl implements ContactService {
     @Autowired
     private ContactRepository contactRepository;
 
-
     @Override
     public List<Contact> findByName(ContactRequest request) {
-        List<Contact> findByNameList = contactRepository.findByName(request.getName());
+        List<Contact> contacts = contactRepository.findByName(request.getName());
         List<Contact> contactList = new ArrayList<>();
-        findByNameList.forEach(a -> {
+        contacts.forEach(a -> {
             if (Objects.equals(a.getName(), request.getName())) {
                 contactList.add(a);
             }
@@ -34,16 +34,8 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public List<Contact> findByFirstName(ContactRequest request) {
-        List<Contact> findByFirstNameList = contactRepository.findByFirstName(request.getFirstName());
-        System.out.println("We are in byFirstName");
-//        List<Contact> contactList = new ArrayList<>();
-//        System.out.println(findByFirstNameList);
-//        findByFirstNameList.forEach(a -> {
-//            if (Objects.equals(a.getFirstName(), request.getFirstName())) {
-//                contactList.add(a);
-//            }
-//        });
-        return findByFirstNameList;
+        List<Contact> contact = contactRepository.findByFirstName(request.getFirstName());
+        return contact;
     }
 
     @Override
@@ -59,8 +51,15 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public Contact findByPhoneNumber(ContactRequest request) {
-        return contactRepository.findByPhoneNumber(request.getPhoneNumber()).orElse(null);
+    public ContactDto findByPhoneNumber(ContactRequest request) {
+        Optional<Contact> contactOptional = contactRepository.findByPhoneNumber(request.getPhoneNumber());
+        if (contactOptional.isPresent()) {
+            Contact contact = contactOptional.get();
+            return ContactDto.builder()
+                    .firstName(contact.getFirstName())
+                    .build();
+        }
+        return null;
     }
 
     @Override
@@ -71,33 +70,37 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public void createNewContact(ContactRequest request) {
-        Contact contact = Contact.builder()
+        contactRepository.save(Contact.builder()
                 .name(request.getName())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())
-                .build();
-        contactRepository.save(contact);
+                .build());
     }
 
     @Override
     public void editContact(ContactRequest request) {
-        Contact findById =  contactRepository.findById(request.getId()).orElse(null);
+        contactRepository.findById(request.getId()).ifPresent(contact -> {
+            contact.setFirstName(request.getFirstName());
+            contact.setName(request.getName());
+            contact.setLastName(request.getName());
+            contact.setPhoneNumber(request.getPhoneNumber());
+            contactRepository.save(contact);
+        });
 
-        assert findById != null;
-        findById.setFirstName(request.getFirstName());
-        findById.setName(request.getName());
-        findById.setLastName(request.getName());
-        findById.setPhoneNumber(request.getPhoneNumber());
+        /*
+        Optional<Contact> contactOptional = contactRepository.findById(request.getId());
 
-        contactRepository.save(findById);
+        if (contactOptional.isPresent()) {
+            Contact con = contactOptional.get();
+            //
+        }
+        */
     }
 
     @Override
     public void deleteContactPhoneNumber(ContactRequest request) {
-
         Optional<Contact> contact = contactRepository.findByPhoneNumber(request.getPhoneNumber());
         contact.ifPresent(contactRepository::delete);
-
     }
 }
