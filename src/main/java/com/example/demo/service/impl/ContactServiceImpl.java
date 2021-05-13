@@ -2,10 +2,13 @@ package com.example.demo.service.impl;
 
 import com.example.demo.entity.Contact;
 import com.example.demo.entity.dto.ContactDto;
+import com.example.demo.entity.specification.ContactSpecification;
+import com.example.demo.mapper.ContactMapper;
 import com.example.demo.model.ContactModel.ContactRequest;
 import com.example.demo.repository.ContactRepository;
 import com.example.demo.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,17 +22,22 @@ public class ContactServiceImpl implements ContactService {
     @Autowired
     private ContactRepository contactRepository;
 
+    @Autowired
+    ContactMapper contactMapper;
+
+    @Override
+    public List<ContactDto> find(ContactRequest request) {
+        Specification<Contact> spec = generateSpecification(request);
+        List<Contact> contacts = contactRepository.findAll(spec);
+        return contactMapper.listContactToListContactDTO(contacts);
+    }
+
     @Override
     public List<ContactDto> findByName(ContactRequest request) {
         List<Contact> contacts = contactRepository.findByName(request.getName());
         List<ContactDto> contactList = new ArrayList<>();
         contacts.forEach(contact -> {
-            contactList.add(ContactDto.builder()
-                    .name(contact.getName())
-                    .firstName(contact.getFirstName())
-                    .lastName(contact.getLastName())
-                    .phoneNumber(contact.getPhoneNumber())
-                    .build());
+            contactList.add(contactMapper.contactToContactDto(contact));
         });
         return contactList;
     }
@@ -39,12 +47,7 @@ public class ContactServiceImpl implements ContactService {
         List<Contact> contacts = contactRepository.findByFirstName(request.getFirstName());
         List<ContactDto> contactList = new ArrayList<>();
         contacts.forEach(contact -> {
-            contactList.add(ContactDto.builder()
-                    .name(contact.getName())
-                    .firstName(contact.getFirstName())
-                    .lastName(contact.getLastName())
-                    .phoneNumber(contact.getPhoneNumber())
-                    .build());
+            contactList.add(contactMapper.contactToContactDto(contact));
         });
         return contactList;
     }
@@ -129,5 +132,21 @@ public class ContactServiceImpl implements ContactService {
     public void deleteContactPhoneNumber(ContactRequest request) {
         Optional<Contact> contact = contactRepository.findByPhoneNumber(request.getPhoneNumber());
         contact.ifPresent(contactRepository::delete);
+    }
+
+    private Specification<Contact> generateSpecification(ContactRequest contactRequest) {
+        Specification<Contact> spec = Specification.where(null);
+
+        if (contactRequest.getName() != null && !contactRequest.getName().isEmpty()) {
+            assert spec != null;
+            spec = spec.and(ContactSpecification.byName(contactRequest.getName()));
+        }
+
+        if (contactRequest.getFirstName() != null) {
+            assert spec != null;
+            spec = spec.and(ContactSpecification.byFirstName(contactRequest.getFirstName()));
+        }
+
+        return spec;
     }
 }

@@ -1,7 +1,6 @@
 package com.example.demo.api;
 
 
-import com.example.demo.entity.Contact;
 import com.example.demo.entity.dto.ContactDto;
 import com.example.demo.model.ContactModel.ContactRequest;
 import com.example.demo.service.ContactService;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/contact")
@@ -20,6 +18,11 @@ public class ContactController {
 
     @Autowired
     private ContactService contactService;
+
+    @PostMapping("/find")
+    public List<ContactDto> find(@RequestBody ContactRequest request) {
+        return contactService.find(request);
+    }
 
     @PostMapping("/createNewContact")
     public void createNewContact(@RequestBody ContactRequest request) {
