@@ -1,5 +1,6 @@
 package com.example.demo.model.ContactModel;
 
+import com.example.demo.model.AddressModel.AddressModel;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,5 +13,6 @@ public class ContactRequest {
     private String firstName;
     private String lastName;
     private String phoneNumber;
+    private AddressModel address;
 
 }

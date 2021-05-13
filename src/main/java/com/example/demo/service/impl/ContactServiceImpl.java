@@ -1,10 +1,12 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.entity.Address;
 import com.example.demo.entity.Contact;
 import com.example.demo.entity.dto.ContactDto;
 import com.example.demo.entity.specification.ContactSpecification;
 import com.example.demo.mapper.ContactMapper;
 import com.example.demo.model.ContactModel.ContactRequest;
+import com.example.demo.repository.AddressRepository;
 import com.example.demo.repository.ContactRepository;
 import com.example.demo.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class ContactServiceImpl implements ContactService {
 
     @Autowired
     private ContactRepository contactRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
 
     @Autowired
     ContactMapper contactMapper;
@@ -100,13 +105,24 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public void createNewContact(ContactRequest request) {
+
+        Contact contact = contactMapper.contactDtoToContact(request);
+
         contactRepository.save(Contact.builder()
-                .name(request.getName())
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .phoneNumber(request.getPhoneNumber())
+                .name(contact.getName())
+                .firstName(contact.getFirstName())
+                .lastName(contact.getLastName())
+                .phoneNumber(contact.getPhoneNumber())
+                .address(addressRepository.save(Address.builder()
+                        .cityName(request.getAddress().getCityName())
+                        .stateName(request.getAddress().getStateName())
+                        .streetName(request.getAddress().getStreetName())
+                        .buildingNumber(request.getAddress().getBuildingNumber())
+                        .flatNumber(request.getAddress().getFlatNumber())
+                        .build()))
                 .build());
     }
+
 
     @Override
     public void editContact(ContactRequest request) {

@@ -19,6 +19,7 @@ public class Contact {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name="name")
@@ -32,4 +33,8 @@ public class Contact {
 
     @Column(name="phone_number", unique = true)
     private String phoneNumber;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "id", referencedColumnName = "id")
+    private Address address;
 }

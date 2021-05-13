@@ -1,5 +1,6 @@
 package com.example.demo.model.ContactModel;
 
+import com.example.demo.entity.Address;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,5 +13,6 @@ public class ContactModel {
     private String firstName;
     private String lastName;
     private String phoneNumber;
+    private Address address;
 
 }

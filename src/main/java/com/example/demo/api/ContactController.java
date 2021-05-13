@@ -26,6 +26,7 @@ public class ContactController {
 
     @PostMapping("/createNewContact")
     public void createNewContact(@RequestBody ContactRequest request) {
+        System.out.println(request);
         contactService.createNewContact(request);
     }
 
