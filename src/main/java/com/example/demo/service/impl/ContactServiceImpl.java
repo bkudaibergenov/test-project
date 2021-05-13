@@ -25,6 +25,7 @@ public class ContactServiceImpl implements ContactService {
         List<ContactDto> contactList = new ArrayList<>();
         contacts.forEach(contact -> {
             contactList.add(ContactDto.builder()
+                    .name(contact.getName())
                     .firstName(contact.getFirstName())
                     .lastName(contact.getLastName())
                     .phoneNumber(contact.getPhoneNumber())
