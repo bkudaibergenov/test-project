@@ -9,11 +9,11 @@ import java.util.Optional;
 
 public interface ContactService {
 
-    List<Contact> findByName(ContactRequest request);
-    List<Contact> findByFirstName(ContactRequest request);
-    List<Contact> findByLastName(ContactRequest request);
+    List<ContactDto> findByName(ContactRequest request);
+    List<ContactDto> findByFirstName(ContactRequest request);
+    List<ContactDto> findByLastName(ContactRequest request);
     ContactDto findByPhoneNumber(ContactRequest request);
-    Optional<Contact> findById(ContactRequest request);
+    ContactDto findById(ContactRequest request);
 
     void createNewContact(ContactRequest request);
     void editContact(ContactRequest request);

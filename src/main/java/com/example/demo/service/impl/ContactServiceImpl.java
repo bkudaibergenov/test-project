@@ -5,14 +5,13 @@ import com.example.demo.entity.dto.ContactDto;
 import com.example.demo.model.ContactModel.ContactRequest;
 import com.example.demo.repository.ContactRepository;
 import com.example.demo.service.ContactService;
-import org.hibernate.sql.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+
 
 @Service
 public class ContactServiceImpl implements ContactService {
@@ -21,31 +20,45 @@ public class ContactServiceImpl implements ContactService {
     private ContactRepository contactRepository;
 
     @Override
-    public List<Contact> findByName(ContactRequest request) {
+    public List<ContactDto> findByName(ContactRequest request) {
         List<Contact> contacts = contactRepository.findByName(request.getName());
-        List<Contact> contactList = new ArrayList<>();
-        contacts.forEach(a -> {
-            if (Objects.equals(a.getName(), request.getName())) {
-                contactList.add(a);
-            }
+        List<ContactDto> contactList = new ArrayList<>();
+        contacts.forEach(contact -> {
+            contactList.add(ContactDto.builder()
+                    .firstName(contact.getFirstName())
+                    .lastName(contact.getLastName())
+                    .phoneNumber(contact.getPhoneNumber())
+                    .build());
         });
         return contactList;
     }
 
     @Override
-    public List<Contact> findByFirstName(ContactRequest request) {
-        List<Contact> contact = contactRepository.findByFirstName(request.getFirstName());
-        return contact;
+    public List<ContactDto> findByFirstName(ContactRequest request) {
+        List<Contact> contacts = contactRepository.findByFirstName(request.getFirstName());
+        List<ContactDto> contactList = new ArrayList<>();
+        contacts.forEach(contact -> {
+            contactList.add(ContactDto.builder()
+                    .name(contact.getName())
+                    .firstName(contact.getFirstName())
+                    .lastName(contact.getLastName())
+                    .phoneNumber(contact.getPhoneNumber())
+                    .build());
+        });
+        return contactList;
     }
 
     @Override
-    public List<Contact> findByLastName(ContactRequest request) {
-        List<Contact> findByLastNameList = contactRepository.findByLastName(request.getLastName());
-        List<Contact> contactList = new ArrayList<>();
-        findByLastNameList.forEach(a -> {
-            if (Objects.equals(a.getLastName(), request.getLastName())) {
-                contactList.add(a);
-            }
+    public List<ContactDto> findByLastName(ContactRequest request) {
+        List<Contact> contacts = contactRepository.findByLastName(request.getLastName());
+        List<ContactDto> contactList = new ArrayList<>();
+        contacts.forEach(contact -> {
+            contactList.add(ContactDto.builder()
+                    .name(contact.getName())
+                    .firstName(contact.getFirstName())
+                    .lastName(contact.getLastName())
+                    .phoneNumber(contact.getPhoneNumber())
+                    .build());
         });
         return contactList;
     }
@@ -56,15 +69,28 @@ public class ContactServiceImpl implements ContactService {
         if (contactOptional.isPresent()) {
             Contact contact = contactOptional.get();
             return ContactDto.builder()
+                    .name(contact.getName())
                     .firstName(contact.getFirstName())
+                    .lastName(contact.getLastName())
+                    .phoneNumber(contact.getPhoneNumber())
                     .build();
         }
         return null;
     }
 
     @Override
-    public Optional<Contact> findById(ContactRequest request) {
-        return contactRepository.findById(request.getId());
+    public ContactDto findById(ContactRequest request) {
+        Optional<Contact> contactOptional = contactRepository.findById(request.getId());
+        if(contactOptional.isPresent()) {
+            Contact contact = contactOptional.get();
+            return ContactDto.builder()
+                    .name(contact.getName())
+                    .firstName(contact.getFirstName())
+                    .lastName(contact.getLastName())
+                    .phoneNumber(contact.getPhoneNumber())
+                    .build();
+        }
+        return null;
     }
 
 

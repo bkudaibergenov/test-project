@@ -2,6 +2,7 @@ package com.example.demo.api;
 
 
 import com.example.demo.entity.Contact;
+import com.example.demo.entity.dto.ContactDto;
 import com.example.demo.model.ContactModel.ContactRequest;
 import com.example.demo.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,28 +28,28 @@ public class ContactController {
 
 
     @PostMapping("/findById")
-    public Optional<Contact> findById(@RequestBody ContactRequest request) {
+    public ContactDto findById(@RequestBody ContactRequest request) {
         return contactService.findById(request);
     }
 
 
     @PostMapping("/findContactByName")
-    public List<Contact> findByName(@RequestBody ContactRequest request) {
+    public List<ContactDto> findByName(@RequestBody ContactRequest request) {
         return contactService.findByName(request);
     }
 
     @PostMapping("/findByFirstName")
-        public List<Contact> findByFirstName(@RequestBody ContactRequest request) {
+        public List<ContactDto> findByFirstName(@RequestBody ContactRequest request) {
         return contactService.findByFirstName(request);
     }
 
     @PostMapping("/findContactByLastName")
-    public List<Contact> findContactByLastName(@RequestBody ContactRequest request) {
+    public List<ContactDto> findContactByLastName(@RequestBody ContactRequest request) {
         return contactService.findByLastName(request);
     }
 
     @PostMapping("/findByPhoneNumber")
-    public Contact findByPhoneNumber(@RequestBody ContactRequest request) {
+    public ContactDto findByPhoneNumber(@RequestBody ContactRequest request) {
         return contactService.findByPhoneNumber(request);
     }
 
