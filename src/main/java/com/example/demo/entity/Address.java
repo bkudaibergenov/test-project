@@ -17,7 +17,6 @@ import javax.persistence.*;
 public class Address {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public Long id;
 

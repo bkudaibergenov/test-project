@@ -16,5 +16,4 @@ public interface ContactRepository extends JpaRepository<Contact, Long>, JpaSpec
     List<Contact> findByLastName(String lastName);
     Optional<Contact> findByPhoneNumber(String phoneNumber);
     Optional<Contact> findById(Long id);
-
 }

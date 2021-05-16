@@ -15,6 +15,7 @@ public interface ContactService {
     List<ContactDto> findByLastName(ContactRequest request);
     ContactDto findByPhoneNumber(ContactRequest request);
     ContactDto findById(ContactRequest request);
+    List<ContactDto> findByCityNameAndStreetName(ContactRequest request);
 
     void createNewContact(ContactRequest request);
     void editContact(ContactRequest request);

@@ -68,4 +68,9 @@ public class ContactController {
         contactService.deleteContactPhoneNumber(request);
     }
 
+    @PostMapping("/findByCityNameAndStreetName")
+    public List<ContactDto> findByCityNameAndStreetName(@RequestBody ContactRequest request) {
+            return contactService.findByCityNameAndStreetName(request);
+        }
 }
+

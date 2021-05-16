@@ -1,6 +1,7 @@
 package com.example.demo.model.ContactModel;
 
 import com.example.demo.entity.Address;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 

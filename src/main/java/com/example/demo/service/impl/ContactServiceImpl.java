@@ -28,11 +28,18 @@ public class ContactServiceImpl implements ContactService {
     private AddressRepository addressRepository;
 
     @Autowired
-    ContactMapper contactMapper;
+    private ContactMapper contactMapper;
 
     @Override
     public List<ContactDto> find(ContactRequest request) {
         Specification<Contact> spec = generateSpecification(request);
+        List<Contact> contacts = contactRepository.findAll(spec);
+        return contactMapper.listContactToListContactDTO(contacts);
+    }
+
+    @Override
+    public List<ContactDto> findByCityNameAndStreetName(ContactRequest request) {
+        Specification<Contact> spec = byCityNameAndStreetName(request);
         List<Contact> contacts = contactRepository.findAll(spec);
         return contactMapper.listContactToListContactDTO(contacts);
     }
@@ -102,24 +109,42 @@ public class ContactServiceImpl implements ContactService {
         return null;
     }
 
+    private static Specification<Contact> byCityNameAndStreetName(ContactRequest request) {
+        Specification<Contact> spec = Specification.where(null);
+
+        if(request.getAddress().getCityName() != null && !request.getAddress().getCityName().isEmpty()) {
+            assert spec != null;
+            spec = spec.and(ContactSpecification.byCityName((request.getAddress().getCityName())));
+        }
+
+        if(request.getAddress().getStreetName() != null && !request.getAddress().getStreetName().isEmpty()) {
+            assert spec != null;
+            spec = spec.and(ContactSpecification.byStreetName((request.getAddress().getStreetName())));
+        }
+        return spec;
+    }
+
 
     @Override
     public void createNewContact(ContactRequest request) {
 
         Contact contact = contactMapper.contactDtoToContact(request);
 
-        contactRepository.save(Contact.builder()
+        Contact newContact = contactRepository.save(Contact.builder()
                 .name(contact.getName())
                 .firstName(contact.getFirstName())
                 .lastName(contact.getLastName())
                 .phoneNumber(contact.getPhoneNumber())
-                .address(addressRepository.save(Address.builder()
-                        .cityName(request.getAddress().getCityName())
-                        .stateName(request.getAddress().getStateName())
-                        .streetName(request.getAddress().getStreetName())
-                        .buildingNumber(request.getAddress().getBuildingNumber())
-                        .flatNumber(request.getAddress().getFlatNumber())
-                        .build()))
+                .build());
+
+        addressRepository.save(Address.builder()
+                .id(newContact.getId())
+                .contact(newContact)
+                .cityName(request.getAddress().getCityName())
+                .stateName(request.getAddress().getStateName())
+                .streetName(request.getAddress().getStreetName())
+                .buildingNumber(request.getAddress().getBuildingNumber())
+                .flatNumber(request.getAddress().getFlatNumber())
                 .build());
     }
 
@@ -150,17 +175,18 @@ public class ContactServiceImpl implements ContactService {
         contact.ifPresent(contactRepository::delete);
     }
 
-    private Specification<Contact> generateSpecification(ContactRequest contactRequest) {
+
+    private Specification<Contact> generateSpecification(ContactRequest request) {
         Specification<Contact> spec = Specification.where(null);
 
-        if (contactRequest.getName() != null && !contactRequest.getName().isEmpty()) {
+        if (request.getName() != null) {
             assert spec != null;
-            spec = spec.and(ContactSpecification.byName(contactRequest.getName()));
+            spec = spec.and(ContactSpecification.byName(request.getName()));
         }
 
-        if (contactRequest.getFirstName() != null) {
+        if (request.getFirstName() != null) {
             assert spec != null;
-            spec = spec.and(ContactSpecification.byFirstName(contactRequest.getFirstName()));
+            spec = spec.and(ContactSpecification.byFirstName(request.getFirstName()));
         }
 
         return spec;
