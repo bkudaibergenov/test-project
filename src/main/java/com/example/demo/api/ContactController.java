@@ -5,11 +5,10 @@ import com.example.demo.entity.dto.ContactDto;
 import com.example.demo.model.ContactModel.ContactRequest;
 import com.example.demo.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
 import java.util.List;
 
 @RestController
@@ -43,7 +42,7 @@ public class ContactController {
     }
 
     @PostMapping("/findByFirstName")
-        public List<ContactDto> findByFirstName(@RequestBody ContactRequest request) {
+    public List<ContactDto> findByFirstName(@RequestBody ContactRequest request) {
         return contactService.findByFirstName(request);
     }
 
@@ -70,7 +69,57 @@ public class ContactController {
 
     @PostMapping("/findByCityNameAndStreetName")
     public List<ContactDto> findByCityNameAndStreetName(@RequestBody ContactRequest request) {
-            return contactService.findByCityNameAndStreetName(request);
-        }
+        return contactService.findByCityNameAndStreetName(request);
+    }
+
+    @PostMapping(value = "/uploadCSV")
+    public String uploadCSV(@RequestParam(value = "file") MultipartFile file) throws IOException {
+        return contactService.uploadCSV(file);
+    }
+
+//    @PostMapping("/uploadCSV2")
+//    public String uploadFile(@ModelAttribute MultipartFile file) throws IOException {
+//        FileInputStream stream = new FileInputStream(new File(String.valueOf(file)));
+//        return stream.toString();
+//    }
+//
+//    @PostMapping("/uploadCSV3")
+//    public String uploadCSVFile1(@RequestParam(value = "file") MultipartFile file) {
+//        if(file.isEmpty()) {
+//            return "not cool";
+//        } else {
+//            return "Cool";
+//        }
+//    }
+//
+//    @PostMapping("/uploadCSV")
+//    public String uploadCSVFile(@RequestParam("file") MultipartFile file) throws IOException {
+//        if(!file.isEmpty()) {
+//            try {
+//                byte[] bytes = file.getBytes();
+//
+//                // Creating the directory to store file
+//                String rootPath = System.getProperty("catalina.home");
+//                File dir = new File(rootPath + File.separator + "tmpFiles");
+//                if(!dir.exists()) {
+//                    dir.mkdirs();
+//                }
+//
+//                // Create the file on server
+//                File serverFile = new File(dir.getAbsolutePath() + File.separator);
+//                BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
+//                stream.write(bytes);
+//                stream.close();
+//
+//                System.out.println("Server File Location=" + serverFile.getAbsolutePath());
+//
+//                return null;
+//            } catch (Exception e) {
+//                return null;
+//            }
+//        }
+//        return "OK";
+//
+//    }
 }
 

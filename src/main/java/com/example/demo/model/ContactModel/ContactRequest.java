@@ -11,11 +11,21 @@ import java.io.Serializable;
 @Data
 public class ContactRequest {
 
+    @JsonProperty("id")
     private Long id;
+
+    @JsonProperty("name")
     private String name;
+
+    @JsonProperty("firstName")
     private String firstName;
+
+    @JsonProperty("lastName")
     private String lastName;
+
+    @JsonProperty("phoneNumber")
     private String phoneNumber;
+
     @JsonProperty("address")
     private AddressModel address;
 

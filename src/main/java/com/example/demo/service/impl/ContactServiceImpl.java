@@ -1,21 +1,28 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.Transactional.AddressTransactional;
+import com.example.demo.Transactional.ContactTransactional;
 import com.example.demo.entity.Address;
 import com.example.demo.entity.Contact;
 import com.example.demo.entity.dto.ContactDto;
+import com.example.demo.entity.dto.FileDto;
 import com.example.demo.entity.specification.ContactSpecification;
 import com.example.demo.mapper.ContactMapper;
 import com.example.demo.model.ContactModel.ContactRequest;
 import com.example.demo.repository.AddressRepository;
 import com.example.demo.repository.ContactRepository;
 import com.example.demo.service.ContactService;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
 
 
 @Service
@@ -26,6 +33,12 @@ public class ContactServiceImpl implements ContactService {
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private ContactTransactional contactTransactional;
+
+    @Autowired
+    private AddressTransactional addressTransactional;
 
     @Autowired
     private ContactMapper contactMapper;
@@ -42,6 +55,38 @@ public class ContactServiceImpl implements ContactService {
         Specification<Contact> spec = byCityNameAndStreetName(request);
         List<Contact> contacts = contactRepository.findAll(spec);
         return contactMapper.listContactToListContactDTO(contacts);
+    }
+
+
+    @Override
+    public String uploadCSV(MultipartFile file) throws IOException {
+        CsvSchema fileDtoLineSchema = CsvSchema.builder().setColumnSeparator(';').build().withHeader();
+        CsvMapper csvMapper = new CsvMapper();
+
+        for (MappingIterator<FileDto> it = csvMapper.readerFor(FileDto.class)
+                .with(fileDtoLineSchema)
+                .readValues(file.getInputStream()); it.hasNext(); ) {
+            FileDto row = it.next();
+
+            Contact newContact = contactTransactional.save(Contact.builder()
+                    .name(row.getName())
+                    .firstName(row.getFirstName())
+                    .lastName(row.getLastName())
+                    .phoneNumber(row.getPhoneNumber())
+                    .build());
+
+            addressRepository.save(Address.builder()
+                    .id(newContact.getId())
+                    .contact(newContact)
+                    .cityName(row.getCityName())
+                    .stateName(row.getStateName())
+                    .streetName(row.getStreetName())
+                    .buildingNumber(row.getBuildingNumber())
+                    .flatNumber(row.getFlatNumber())
+                    .build());
+        }
+
+        return "Ok";
     }
 
     @Override
@@ -190,5 +235,55 @@ public class ContactServiceImpl implements ContactService {
         }
 
         return spec;
+    }
+
+    private static String csvToJson(List<String> csv){
+
+        //remove empty lines
+        //this will affect permanently the list.
+        //be careful if you want to use this list after executing this method
+        csv.removeIf(e -> e.trim().isEmpty());
+
+        //csv is empty or have declared only columns
+        if(csv.size() <= 1){
+            return "[]";
+        }
+
+        //get first line = columns names
+        String[] columns = csv.get(0).split(",");
+
+        //get all rows
+        StringBuilder json = new StringBuilder("[\n");
+        csv.subList(1, csv.size()) //substring without first row(columns)
+                .stream()
+                .map(e -> e.split(","))
+                .filter(e -> e.length == columns.length) //values size should match with columns size
+                .forEach(row -> {
+
+                    json.append("\t{\n");
+
+                    for(int i = 0; i < columns.length; i++){
+                        json.append("\t\t\"")
+                                .append(columns[i])
+                                .append("\" : \"")
+                                .append(row[i])
+                                .append("\",\n"); //comma-1
+                    }
+
+                    //replace comma-1 with \n
+                    json.replace(json.lastIndexOf(","), json.length(), "\n");
+
+                    json.append("\t},"); //comma-2
+
+                });
+
+        //remove comma-2
+        json.replace(json.lastIndexOf(","), json.length(), "");
+
+        json.append("\n]");
+        System.out.println(json.toString());
+
+        return json.toString();
+
     }
 }
