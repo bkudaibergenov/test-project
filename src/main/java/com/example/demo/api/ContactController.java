@@ -1,7 +1,9 @@
 package com.example.demo.api;
 
 
+import com.example.demo.entity.Contact;
 import com.example.demo.entity.dto.ContactDto;
+import com.example.demo.mapper.ContactMapper;
 import com.example.demo.model.ContactModel.ContactRequest;
 import com.example.demo.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,9 @@ public class ContactController {
 
     @Autowired
     private ContactService contactService;
+
+    @Autowired
+    ContactMapper contactMapper;
 
     @PostMapping("/find")
     public List<ContactDto> find(@RequestBody ContactRequest request) {
@@ -53,7 +58,8 @@ public class ContactController {
 
     @PostMapping("/findByPhoneNumber")
     public ContactDto findByPhoneNumber(@RequestBody ContactRequest request) {
-        return contactService.findByPhoneNumber(request);
+        Contact contactDto = contactMapper.contactDtoToContact(request);
+        return contactService.findByPhoneNumber(contactDto);
     }
 
     @PostMapping("/editContact")
@@ -63,7 +69,6 @@ public class ContactController {
 
     @PostMapping("/deleteContactPhoneNumber")
     public void deleteContactPhoneNumber(@RequestBody ContactRequest request) {
-
         contactService.deleteContactPhoneNumber(request);
     }
 
@@ -73,7 +78,7 @@ public class ContactController {
     }
 
     @PostMapping(value = "/uploadCSV")
-    public String uploadCSV(@RequestParam(value = "file") MultipartFile file) throws IOException {
+    public String uploadCSV(@RequestParam(value = "file") MultipartFile file) throws Exception {
         return contactService.uploadCSV(file);
     }
 

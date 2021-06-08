@@ -60,33 +60,66 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public String uploadCSV(MultipartFile file) throws IOException {
+        List<FileDto> fileDtoList = csvToFileDtoList(file);
+        return insertFromCsv(fileDtoList);
+    }
+
+
+    public List<FileDto> csvToFileDtoList(MultipartFile file) throws IOException {
         CsvSchema fileDtoLineSchema = CsvSchema.builder().setColumnSeparator(';').build().withHeader();
         CsvMapper csvMapper = new CsvMapper();
+        List<FileDto> fileDtoList = new ArrayList<>();
 
-        for (MappingIterator<FileDto> it = csvMapper.readerFor(FileDto.class)
+        for (MappingIterator<FileDto> line = csvMapper.readerFor(FileDto.class)
                 .with(fileDtoLineSchema)
-                .readValues(file.getInputStream()); it.hasNext(); ) {
-            FileDto row = it.next();
-
-            Contact newContact = contactTransactional.save(Contact.builder()
-                    .name(row.getName())
-                    .firstName(row.getFirstName())
-                    .lastName(row.getLastName())
-                    .phoneNumber(row.getPhoneNumber())
-                    .build());
-
-            addressRepository.save(Address.builder()
-                    .id(newContact.getId())
-                    .contact(newContact)
-                    .cityName(row.getCityName())
-                    .stateName(row.getStateName())
-                    .streetName(row.getStreetName())
-                    .buildingNumber(row.getBuildingNumber())
-                    .flatNumber(row.getFlatNumber())
-                    .build());
+                .readValues(file.getInputStream()); line.hasNext();)  {
+            FileDto fileDto = line.next();
+            fileDtoList.add(fileDto);
         }
 
-        return "Ok";
+        return fileDtoList;
+    }
+
+
+    @Transactional(rollbackFor = UploadException.class)
+    public String insertFromCsv(List<FileDto> fileDtoList) throws UploadException {
+
+        final String[] statusMsg = new String[1];
+        statusMsg[0] = "Все загружено";
+
+        fileDtoList.forEach(fileDto -> {
+            if (!insertContact(fileDto)) {
+                throw new UploadException("Номер телефона существует: " + fileDto.getPhoneNumber());
+            }
+        });
+        return statusMsg[0];
+    }
+
+
+    public Boolean insertContact(FileDto fileDto) {
+
+        Contact newContact = Contact.builder()
+                .name(fileDto.getName())
+                .firstName(fileDto.getFirstName())
+                .lastName(fileDto.getLastName())
+                .phoneNumber(fileDto.getPhoneNumber())
+                .build();
+
+        if (findByPhoneNumber(newContact) == null) {
+            newContact = contactRepository.save(newContact);
+            {
+                addressRepository.save(Address.builder()
+                        .id(newContact.getId())
+                        .contact(newContact)
+                        .cityName(fileDto.getCityName())
+                        .stateName(fileDto.getStateName())
+                        .streetName(fileDto.getStreetName())
+                        .buildingNumber(fileDto.getBuildingNumber())
+                        .flatNumber(fileDto.getFlatNumber())
+                        .build());
+            }
+            return true;
+        } else return false;
     }
 
     @Override
@@ -94,7 +127,7 @@ public class ContactServiceImpl implements ContactService {
         List<Contact> contacts = contactRepository.findByName(request.getName());
         List<ContactDto> contactList = new ArrayList<>();
         contacts.forEach(contact -> {
-            contactList.add(contactMapper.contactToContactDto(contact));
+            contactList.add(contactMapper.contactToContactDto(request));
         });
         return contactList;
     }
@@ -104,7 +137,7 @@ public class ContactServiceImpl implements ContactService {
         List<Contact> contacts = contactRepository.findByFirstName(request.getFirstName());
         List<ContactDto> contactList = new ArrayList<>();
         contacts.forEach(contact -> {
-            contactList.add(contactMapper.contactToContactDto(contact));
+            contactList.add(contactMapper.contactToContactDto(request));
         });
         return contactList;
     }
@@ -125,15 +158,15 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public ContactDto findByPhoneNumber(ContactRequest request) {
-        Optional<Contact> contactOptional = contactRepository.findByPhoneNumber(request.getPhoneNumber());
+    public ContactDto findByPhoneNumber(Contact contact) {
+        Optional<Contact> contactOptional = contactRepository.findByPhoneNumber(contact.getPhoneNumber());
         if (contactOptional.isPresent()) {
-            Contact contact = contactOptional.get();
+            Contact findContact = contactOptional.get();
             return ContactDto.builder()
-                    .name(contact.getName())
-                    .firstName(contact.getFirstName())
-                    .lastName(contact.getLastName())
-                    .phoneNumber(contact.getPhoneNumber())
+                    .name(findContact.getName())
+                    .firstName(findContact.getFirstName())
+                    .lastName(findContact.getLastName())
+                    .phoneNumber(findContact.getPhoneNumber())
                     .build();
         }
         return null;
@@ -235,55 +268,5 @@ public class ContactServiceImpl implements ContactService {
         }
 
         return spec;
-    }
-
-    private static String csvToJson(List<String> csv){
-
-        //remove empty lines
-        //this will affect permanently the list.
-        //be careful if you want to use this list after executing this method
-        csv.removeIf(e -> e.trim().isEmpty());
-
-        //csv is empty or have declared only columns
-        if(csv.size() <= 1){
-            return "[]";
-        }
-
-        //get first line = columns names
-        String[] columns = csv.get(0).split(",");
-
-        //get all rows
-        StringBuilder json = new StringBuilder("[\n");
-        csv.subList(1, csv.size()) //substring without first row(columns)
-                .stream()
-                .map(e -> e.split(","))
-                .filter(e -> e.length == columns.length) //values size should match with columns size
-                .forEach(row -> {
-
-                    json.append("\t{\n");
-
-                    for(int i = 0; i < columns.length; i++){
-                        json.append("\t\t\"")
-                                .append(columns[i])
-                                .append("\" : \"")
-                                .append(row[i])
-                                .append("\",\n"); //comma-1
-                    }
-
-                    //replace comma-1 with \n
-                    json.replace(json.lastIndexOf(","), json.length(), "\n");
-
-                    json.append("\t},"); //comma-2
-
-                });
-
-        //remove comma-2
-        json.replace(json.lastIndexOf(","), json.length(), "");
-
-        json.append("\n]");
-        System.out.println(json.toString());
-
-        return json.toString();
-
     }
 }
