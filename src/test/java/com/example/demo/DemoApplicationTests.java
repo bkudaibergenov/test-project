@@ -23,6 +23,9 @@ import java.nio.file.Files;
 class DemoApplicationTests {
 	File File = new File("/Users/derbisshyngys/IdeaProjects/test-project/src/main/resources/1.csv");
 
+	FileItem fileItem = new DiskFileItem("file", Files.probeContentType(File.toPath()),
+			false, File.getName(), (int) File.length(), File.getParentFile());
+
 	@Autowired
 	private ContactController contactController;
 
@@ -35,6 +38,9 @@ class DemoApplicationTests {
 	@Autowired
 	private AddressRepository addressRepository;
 
+	DemoApplicationTests() throws IOException {
+	}
+
 
 	@Test
 	void contextLoads() {
@@ -43,9 +49,6 @@ class DemoApplicationTests {
 
 	@Test
 	void uploadCsvTest() throws Exception {
-		FileItem fileItem = new DiskFileItem("file", Files.probeContentType(File.toPath()),
-				false, File.getName(), (int) File.length(), File.getParentFile());
-
 		try (InputStream in = new FileInputStream(File); OutputStream out = fileItem.getOutputStream()) {
 			IOUtils.copy(in, out);
 		} catch (Exception e) {
@@ -58,9 +61,6 @@ class DemoApplicationTests {
 
 	@Test
 	void uploadCsvFailTest() throws Exception {
-		FileItem fileItem = new DiskFileItem("file", Files.probeContentType(File.toPath()),
-				false, File.getName(), (int) File.length(), File.getParentFile());
-
 		try (InputStream in = new FileInputStream(File); OutputStream out = fileItem.getOutputStream()) {
 			IOUtils.copy(in, out);
 		} catch (Exception e) {
