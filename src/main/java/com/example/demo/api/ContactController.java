@@ -78,7 +78,7 @@ public class ContactController {
     }
 
     @PostMapping(value = "/uploadCSV")
-    public String uploadCSV(@RequestParam(value = "file") MultipartFile file) throws Exception {
+    public List<String> uploadCSV(@RequestParam(value = "file") MultipartFile file) throws Exception {
         return contactService.uploadCSV(file);
     }
 

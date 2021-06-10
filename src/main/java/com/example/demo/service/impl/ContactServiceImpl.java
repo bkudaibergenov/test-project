@@ -25,6 +25,7 @@ import java.io.*;
 import java.util.*;
 
 
+@Transactional
 @Service
 public class ContactServiceImpl implements ContactService {
 
@@ -59,9 +60,24 @@ public class ContactServiceImpl implements ContactService {
 
 
     @Override
-    public String uploadCSV(MultipartFile file) throws IOException {
+    public List<String> uploadCSV(MultipartFile file) throws IOException {
         List<FileDto> fileDtoList = csvToFileDtoList(file);
-        return insertFromCsv(fileDtoList);
+        List<Integer> existingContacts = insertFromCsv(fileDtoList);
+        List<String> phoneNumbers = new ArrayList<>();
+
+        if (existingContacts.size() == 0) {
+            phoneNumbers.add("true");
+            phoneNumbers.add("Все загружено");
+            return phoneNumbers;
+        } else {
+            phoneNumbers.add("false");
+            phoneNumbers.add("В базе существуют следующие номера:\n");
+
+            existingContacts.forEach(index -> {
+                phoneNumbers.set(1, phoneNumbers.get(1) + fileDtoList.get(index).getPhoneNumber() + "\n");
+            });
+            return phoneNumbers;
+        }
     }
 
 
@@ -82,17 +98,15 @@ public class ContactServiceImpl implements ContactService {
 
 
     @Transactional(rollbackFor = UploadException.class)
-    public String insertFromCsv(List<FileDto> fileDtoList) throws UploadException {
-
-        final String[] statusMsg = new String[1];
-        statusMsg[0] = "Все загружено";
+    public List<Integer> insertFromCsv(List<FileDto> fileDtoList) throws UploadException {
+         List<Integer> existingContacts = new ArrayList<>();
 
         fileDtoList.forEach(fileDto -> {
             if (!insertContact(fileDto)) {
-                throw new UploadException("Номер телефона существует: " + fileDto.getPhoneNumber());
+                existingContacts.add(fileDtoList.indexOf(fileDto));
             }
         });
-        return statusMsg[0];
+        return existingContacts;
     }
 
 

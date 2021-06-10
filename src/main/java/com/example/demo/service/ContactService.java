@@ -18,7 +18,7 @@ public interface ContactService {
     ContactDto findByPhoneNumber(Contact contact);
     ContactDto findById(ContactRequest request);
     List<ContactDto> findByCityNameAndStreetName(ContactRequest request);
-    String uploadCSV(MultipartFile file) throws IOException, Exception;
+    List<String> uploadCSV(MultipartFile file) throws IOException, Exception;
 
     void createNewContact(ContactRequest request);
     void editContact(ContactRequest request);
