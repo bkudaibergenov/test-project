@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -31,14 +32,14 @@ import java.nio.file.Files;
 
 
 @RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@Testcontainers
-@Sql("src/main/resources/database/data.sql")
-@TestExecutionListeners
+//@ActiveProfiles("test")
+//@Testcontainers
+//@Sql("src/main/resources/database/data.sql")
+//@TestExecutionListeners
 @SpringBootTest
-@ContextConfiguration(initializers = {
-		Postgres.Initializer.class
-})
+//@ContextConfiguration(initializers = {
+//		Postgres.Initializer.class
+//})
 @ExtendWith(SpringExtension.class)
 @Transactional
 class DemoApplicationTests {
@@ -60,17 +61,17 @@ class DemoApplicationTests {
 	FileItem fileItem = new DiskFileItem("file", Files.probeContentType(File.toPath()),
 			false, File.getName(), (int) File.length(), File.getParentFile());
 
-	@Container
-	GenericContainer container = new GenericContainer(DockerImageName.parse("DemoApplicationTest.java"))
-			.withClasspathResourceMapping("1.csv", "src/main/resources/1.csv", BindMode.READ_ONLY);
-
-
-	@DynamicPropertySource
-	static void properties(DynamicPropertyRegistry registry) {
-		registry.add("spring.datasource.url", Postgres.psqlContainer::getJdbcUrl);
-		registry.add("spring.datasource.username", Postgres.psqlContainer::getUsername);
-		registry.add("spring.datasource.password", Postgres.psqlContainer::getPassword);
-	}
+//	@Container
+//	GenericContainer container = new GenericContainer(DockerImageName.parse("DemoApplicationTest.java"))
+//			.withClasspathResourceMapping("1.csv", "src/main/resources/1.csv", BindMode.READ_ONLY);
+//
+//
+//	@DynamicPropertySource
+//	static void properties(DynamicPropertyRegistry registry) {
+//		registry.add("spring.datasource.url", Postgres.psqlContainer::getJdbcUrl);
+//		registry.add("spring.datasource.username", Postgres.psqlContainer::getUsername);
+//		registry.add("spring.datasource.password", Postgres.psqlContainer::getPassword);
+//	}
 
 	DemoApplicationTests() throws IOException {
 	}
