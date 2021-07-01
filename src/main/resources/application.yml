@@ -12,3 +12,18 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: none
+
+#services:
+#  my-service:
+#    image: my-service
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/my-service
+#      - SPRING_DATASOURCE_USERNAME=user
+#      - SPRING_DATASOURCE_PASSWORD=postgres
+#  postgresql:
+#    image: postgres:42.2.20
+#    environment:
+#      - POSTGRES_USER=user
+#      - POSTGRES_PASSWORD=postgres
+#    ports:
+#      - 5432:5432
